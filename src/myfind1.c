@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include<unistd.h>
+#include <fcntl.h>
 #include<sys/types.h>
 #include<dirent.h>
 #include<err.h>
@@ -9,6 +11,11 @@
 int print_dir_loop(char *name)
 {
     DIR *curdir = opendir(name);
+    if(!curdir)
+    {
+        warnx(" cannot  open %s: bad directory name" , name);
+        return 1;
+    }
     struct dirent *dir = readdir(curdir);
     struct stat dirbuf;
     char *dirname;
@@ -24,7 +31,12 @@ int print_dir_loop(char *name)
             closedir(curdir);
             return 1;
         }
-        if(S_ISDIR (dirbuf.st_mode ))
+        if(S_ISLNK(dirbuf.st_mode))
+        {
+            printf("safd");
+            return 0;   
+        }
+        else if(S_ISDIR (dirbuf.st_mode ))
         {
             if(print_dir_loop(dirname) == 1)
             {
@@ -51,17 +63,28 @@ int print_dir(char *name)
         warnx(" cannot  open %s: bad directory name" , name);
         return 1;
     }
-    struct dirent *dir = readdir(firstdir);
     printf("%s\n" , name);
     if(print_dir_loop(name) == 1)
         return 1; 
-    closedir(firstdir);
+    //closedir(firstdir);
     return 0;
 }
 int main(int argc , char *argv[])
 {   
     int returnval = 0;
     char *name;
+/*    char *names[10];
+    int n_index;
+    int o_index;
+    char options[10];
+    for(int i = 0; i < argc; i++)
+    {
+        if(argv[i][1] == '-')
+        {
+            options[o_index] = argv[i][2];
+            o_index++;
+        }
+    }*/
     if(argc == 1)
         name = ".";
     else
@@ -69,6 +92,5 @@ int main(int argc , char *argv[])
         name = argv[1];
     }
     returnval = print_dir(name);
-    printf("%s" , mycat("ab" , "cd"));
     return returnval;
 }

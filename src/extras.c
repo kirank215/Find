@@ -35,11 +35,15 @@ char *mycat(char *s1 , char *s2)
     int j = -1;
     for (; *(s1 + i) != '\0';i++)
         *(new + i) = *(s1 + i);
-    *(new + i) = '/';
+    if(*(new + i - 1) != '/')
+    {
+        *(new + i) = '/';
+        i++;
+    }
     do
     {
         j++;
-        *(new + i + j + 1) = *(s2 + j);
+        *(new + i + j) = *(s2 + j);
     }while (*(s2 + j) != '\0');
     return new;
 }
