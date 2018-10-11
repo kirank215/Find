@@ -9,7 +9,13 @@
 #include<sys/stat.h>
 #include<stdlib.h>
 #include"myfind.h"
-int print_dir_loop(char *name , int n)
+struct test tests[3] = 
+{
+    { .name = "-name" , .fun = name } ,
+    { .name = "-type" , .fun = type } , 
+    { .name = "-print" , .fun = printd }  
+};
+int dir_loop(char *name , int n , char *exp , char *earg)
 {
     DIR *curdir = opendir(name);
     int statval;
@@ -20,7 +26,7 @@ int print_dir_loop(char *name , int n)
     }
     struct dirent *dir = readdir(curdir);
     struct stat dirbuf;
-    char *dirname;
+    char *dirname= NULL;
     for (; dir != NULL ; dir = readdir(curdir))
     {
         if(mycmp(dir->d_name , ".") == 1 || mycmp(dir->d_name ,"..") == 1)
@@ -30,10 +36,15 @@ int print_dir_loop(char *name , int n)
             statval = stat(dirname , &dirbuf);
         else
             statval = lstat(dirname , &dirbuf);
-        printf("%s \n" , dirname);
+        for(int l = 0; l < 3; l++)
+        {
+            if(mycmp(exp , tests[l].name) == 1)
+                tests[l].fun(dirname , earg);
+        }
+        //printf("%s \n" , dirname);
         if(statval == -1)
         {
-            warnx(" cannot stat: %d " , errno);
+            warnx("%s: cannot stat" , dirname);
             closedir(curdir);
             return 1;
         }
@@ -43,7 +54,7 @@ int print_dir_loop(char *name , int n)
         }
         else if(S_ISDIR (dirbuf.st_mode ))
         {
-            if(print_dir_loop(dirname , 1) == 1)
+            if(dir_loop(dirname , 1 , exp , earg) == 1)
             {
                 closedir(curdir);
                 return 1;
@@ -60,27 +71,24 @@ int print_dir_loop(char *name , int n)
     closedir(curdir);
     return 0;
 }
-int print_dir(char *name , int n)
+int find_dir(char *name , int n , char *exp , char *earg)
 {
-    DIR *firstdir = opendir(name);
     struct stat fbuf;
-    if(!firstdir)
-    {
-        warnx(" cannot  open %s: bad directory name" , name);
-        return 1;
-    }
     if (lstat(name , &fbuf) == -1)
     {
-        warnx(" cannot stat: %d " , errno);
-        closedir(firstdir);
+        warnx(" cannot stat: %s " , name);
         return 1;
     } 
-    printf("%s\n" , name);
+    for(int l = 0; l < 3; l++)
+    {
+        if(mycmp(exp , tests[l].name) == 1)
+            tests[l].fun(name , earg);
+    }
+    //printf("%s\n" , name);
     if( S_ISLNK(fbuf.st_mode) && (n == 1))
         return 0;
-    if(print_dir_loop(name , n & 5) == 1)
+    if(dir_loop(name , n & 5 , exp , earg) == 1)
         return 1; 
-    //closedir(firstdir);
     return 0;
 }
 int main(int argc , char *argv[])
@@ -90,18 +98,29 @@ int main(int argc , char *argv[])
     name[0] = ".";
     int n_index = 0;
     int option = 1;   // p is set
+    char *exp = "-print";
+    char *earg = "\n";
     for(int i = 1; i < argc; i++)
     {
         if(argv[i][0] == '-')
         {
-            if(argv[i][1] == 'P')
-                option = option | 1;
-            else if(argv[i][1] == 'L')
-                option = option & 6;
-            else if(argv[i][1] == 'H')
-                option = option | 2;
-            else if(argv[i][1] == 'd')
-                option = option | 4;
+            if(mylen(argv[i]) == 2)
+            {
+                if(argv[i][1] == 'P')
+                    option = option | 1;
+                else if(argv[i][1] == 'L')
+                    option = option & 6;
+                else if(argv[i][1] == 'H')
+                    option = option | 2;
+                else if(argv[i][1] == 'd')
+                    option = option | 4;
+            }
+            else 
+            {
+                exp = argv[i];
+                earg = argv[i+1];
+                printf(" %s , %s " , exp , earg);
+            }
         }
         else
         {
@@ -109,14 +128,8 @@ int main(int argc , char *argv[])
             n_index++;
         }
     }
-    /* if(argc == 1)
-       name = ".";
-       else
-       {
-       name = argv[1];
-       }*/
     n_index = (n_index == 0) ? 1 : n_index;
     for( int i=0; i < n_index; i++)
-        returnval = print_dir(name[i] , option);
+        returnval = find_dir(name[i] , option, exp , earg);
     return returnval;
 }

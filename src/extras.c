@@ -30,7 +30,7 @@ int mycmp(char *s1 , char *s2)
 }
 char *mycat(char *s1 , char *s2)
 {
-    char *new = malloc(sizeof(mylen(s1) + mylen(s2) + 1));
+    char *new = malloc(sizeof(char)*(mylen(s1) + mylen(s2) + 1));
     int i = 0;
     int j = -1;
     for (; *(s1 + i) != '\0';i++)

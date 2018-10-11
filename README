@@ -1,1 +1,7 @@
-Monday evening Kiran says Hi
+I have completed until the end of threshold 1. There are still a bug where i
+forget to close some directories which i cant seem to find where. Hence it
+cannot handle very large directories. I also have to look further into threshold
+3 and 4 before implementing threshold 2 to get a better picture of what i will
+have to do.
+My type and name still dont work even though i have some code on them
+I also have to complete my testsuite
