@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include<stdio.h>
 #include<unistd.h>
 #include <fcntl.h>
@@ -25,16 +26,15 @@ int print_dir_loop(char *name)
             continue;
         dirname = mycat(name , dir->d_name);
         printf("%s \n" , dirname);
-        if(stat(dirname , &dirbuf) == -1)
+        if(lstat(dirname , &dirbuf) == -1)
         {
             warnx(" cannot stat: %d " , errno);
             closedir(curdir);
             return 1;
         }
-        if(S_ISLNK(dirbuf.st_mode))
+        if(S_ISLNK (dirbuf.st_mode))
         {
-            printf("safd");
-            return 0;   
+            return 0;
         }
         else if(S_ISDIR (dirbuf.st_mode ))
         {
