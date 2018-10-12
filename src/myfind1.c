@@ -50,6 +50,8 @@ int dir_loop(char *name , int n , char *exp , char *earg)
         }
         if(S_ISLNK (dirbuf.st_mode))
         {
+            free(dirname);
+            closedir(curdir);
             return 0;
         }
         else if(S_ISDIR (dirbuf.st_mode ))

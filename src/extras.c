@@ -30,9 +30,9 @@ int mycmp(char *s1 , char *s2)
 }
 char *mycat(char *s1 , char *s2)
 {
-    char *new = malloc(sizeof(char)*(mylen(s1) + mylen(s2) + 1));
+    char *new = calloc((mylen(s1) + mylen(s2) + 2) , sizeof(char));
     int i = 0;
-    int j = -1;
+    int j = 0;
     for (; *(s1 + i) != '\0';i++)
         *(new + i) = *(s1 + i);
     if(*(new + i - 1) != '/')
@@ -40,10 +40,11 @@ char *mycat(char *s1 , char *s2)
         *(new + i) = '/';
         i++;
     }
-    do
+    while (*(s2 + j) != '\0')
     {
-        j++;
         *(new + i + j) = *(s2 + j);
-    }while (*(s2 + j) != '\0');
+        j++;
+    }
+    *(new + i + j) = '\0';
     return new;
 }
