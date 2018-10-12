@@ -100,14 +100,10 @@ int main(int argc , char *argv[])
     name[0] = ".";
     int n_index = 0;
     int option = 1;   // p is set
-    char *exp = "-print";
-    char *earg = "\n";
     for(int i = 1; i < argc; i++)
     {
-        if(argv[i][0] == '-')
+        if(argv[i][0] == '-' && mylen(argv[i]) == 2)
         {
-            if(mylen(argv[i]) == 2)
-            {
                 if(argv[i][1] == 'P')
                     option = option | 1;
                 else if(argv[i][1] == 'L')
@@ -116,22 +112,23 @@ int main(int argc , char *argv[])
                     option = option | 2;
                 else if(argv[i][1] == 'd')
                     option = option | 4;
-            }
-            else 
-            {
-                exp = argv[i];
-                earg = argv[i+1];
-                printf(" %s , %s " , exp , earg);
-            }
         }
-        else
+        else if( argv[i][0] != '-')
         {
             name[n_index] = argv[i];
             n_index++;
         }
+        else 
+        {
+            struct exptree *tree = parse(argv , i , argc);
+            printf("%s " ,  name[0]);
+            print_tree(tree);
+            free_tree(tree);
+            break;
+        }
     }
     n_index = (n_index == 0) ? 1 : n_index;
-    for( int i=0; i < n_index; i++)
-        returnval = find_dir(name[i] , option, exp , earg);
+   // for( int i=0; i < n_index; i++)
+    //    returnval = find_dir(name[i] , option, exp , earg);
     return returnval;
 }
