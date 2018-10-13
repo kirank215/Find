@@ -14,11 +14,10 @@
 int printd(char *n , char *nl)
 {
     printf("%s%s" , n , nl);
-    return 0;
+    return 1;
 }
 int name(char *n , char *name)
 {
-    
     return fnmatch( name , n , 0); 
 }
 
@@ -30,20 +29,20 @@ int type(char *n , char *t)
         warnx("%s: stat failed" , n);
     }
     if(S_ISLNK(buf.st_mode) && *t == 'l')
-        return 0;
+        return 1;
     else if(S_ISBLK(buf.st_mode) && *t == 'b')
-        return 0;
+        return 1;
     else if(S_ISCHR(buf.st_mode) && *t == 'c')
-        return 0;
+        return 1;
     else if(S_ISLNK(buf.st_mode) && *t == 'l')
-        return 0;
+        return 1;
     else if(S_ISDIR(buf.st_mode) && *t == 'd')
-        return 0;
+        return 1;
     else if(S_ISREG(buf.st_mode) && *t == 'f')
-        return 0;
+        return 1;
     else if(S_ISFIFO(buf.st_mode) && *t == 'p')
-        return 0;
+        return 1;
     else if(S_ISSOCK(buf.st_mode) && *t == 's')
-        return 0;
-    return 1;
+        return 1;
+    return 0;
 }

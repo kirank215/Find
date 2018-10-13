@@ -1,7 +1,7 @@
 #define _DEFAULT_SOURCE
 #include<stdio.h>
 #include<unistd.h>
-#include <fcntl.h>
+#include<fcntl.h>
 #include<sys/types.h>
 #include<dirent.h>
 #include<err.h>
@@ -9,14 +9,9 @@
 #include<sys/stat.h>
 #include<stdlib.h>
 #include"myfind.h"
-struct test tests[3] = 
+int dir_loop(char *name , int n , struct exptree *t)
 {
-    { .name = "-name" , .fun = name } ,
-    { .name = "-type" , .fun = type } , 
-    { .name = "-print" , .fun = printd }  
-};
-int dir_loop(char *name , int n , char *exp , char *earg)
-{
+    int rv = 2;
     DIR *curdir = opendir(name);
     int statval;
     if(!curdir)
@@ -36,12 +31,8 @@ int dir_loop(char *name , int n , char *exp , char *earg)
             statval = stat(dirname , &dirbuf);
         else
             statval = lstat(dirname , &dirbuf);
-        for(int l = 0; l < 3; l++)
-        {
-            if(mycmp(exp , tests[l].name) == 1)
-                tests[l].fun(dirname , earg);
-        }
-        //printf("%s \n" , dirname);
+        if(eval(dirname , t) == 1)
+            rv = 0;
         if(statval == -1)
         {
             warnx("%s: cannot stat" , dirname);
@@ -52,11 +43,11 @@ int dir_loop(char *name , int n , char *exp , char *earg)
         {
             free(dirname);
             closedir(curdir);
-            return 0;
+            return rv;
         }
         else if(S_ISDIR (dirbuf.st_mode ))
         {
-            if(dir_loop(dirname , 1 , exp , earg) == 1)
+            if(dir_loop(dirname , 1 , t) == 1)
             {
                 closedir(curdir);
                 return 1;
@@ -71,31 +62,31 @@ int dir_loop(char *name , int n , char *exp , char *earg)
         return 1;
     }
     closedir(curdir);
-    return 0;
+    return rv;
 }
-int find_dir(char *name , int n , char *exp , char *earg)
+int find_dir(char *name , int n , struct exptree *t)
 {
+    int returnv = 1;
+    int valreturn;
     struct stat fbuf;
     if (lstat(name , &fbuf) == -1)
     {
         warnx(" cannot stat: %s " , name);
         return 1;
-    } 
-    for(int l = 0; l < 3; l++)
-    {
-        if(mycmp(exp , tests[l].name) == 1)
-            tests[l].fun(name , earg);
     }
-    //printf("%s\n" , name);
+    if(eval(name , t) == 1)
+        returnv=0;
     if( S_ISLNK(fbuf.st_mode) && (n == 1))
-        return 0;
-    if(dir_loop(name , n & 5 , exp , earg) == 1)
-        return 1; 
-    return 0;
+        return returnv;
+    valreturn = dir_loop(name , n & 5 , t);  // if 1 -> error
+    if(valreturn != 2)                              // if 2->file not found
+        return valreturn;
+    return returnv;
 }
 int main(int argc , char *argv[])
 {   
     int returnval = 0;
+    struct exptree *tree;
     char *(name)[10];
     name[0] = ".";
     int n_index = 0;
@@ -120,15 +111,12 @@ int main(int argc , char *argv[])
         }
         else 
         {
-            struct exptree *tree = parse(argv , i , argc);
-            printf("%s " ,  name[0]);
-            print_tree(tree);
-            free_tree(tree);
+            tree = parse(argv , i , argc);
             break;
         }
     }
     n_index = (n_index == 0) ? 1 : n_index;
-   // for( int i=0; i < n_index; i++)
-    //    returnval = find_dir(name[i] , option, exp , earg);
+    for( int i=0; i < n_index; i++)
+        returnval = find_dir(name[i] , option, tree);
     return returnval;
 }
