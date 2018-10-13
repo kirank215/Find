@@ -31,7 +31,7 @@ int dir_loop(char *name , int n , struct exptree *t)
             statval = stat(dirname , &dirbuf);
         else
             statval = lstat(dirname , &dirbuf);
-        if(eval(dirname , t) == 1)
+        if(eval(dirname ,dir->d_name , t) == 1)
             rv = 0;
         if(statval == -1)
         {
@@ -74,7 +74,7 @@ int find_dir(char *name , int n , struct exptree *t)
         warnx(" cannot stat: %s " , name);
         return 1;
     }
-    if(eval(name , t) == 1)
+    if(eval(name ,name, t) == 1)
         returnv=0;
     if( S_ISLNK(fbuf.st_mode) && (n == 1))
         return returnv;
@@ -86,7 +86,7 @@ int find_dir(char *name , int n , struct exptree *t)
 int main(int argc , char *argv[])
 {   
     int returnval = 0;
-    struct exptree *tree;
+    struct exptree *tree = NULL;
     char *(name)[10];
     name[0] = ".";
     int n_index = 0;
@@ -115,8 +115,11 @@ int main(int argc , char *argv[])
             break;
         }
     }
+    if(tree == NULL)
+        tree = create_n("-print" , "\n");
     n_index = (n_index == 0) ? 1 : n_index;
     for( int i=0; i < n_index; i++)
         returnval = find_dir(name[i] , option, tree);
+    free_tree(tree);
     return returnval;
 }

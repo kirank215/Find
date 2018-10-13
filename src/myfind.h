@@ -32,5 +32,5 @@ struct exptree *add_r(struct exptree *n1 , struct exptree *n2);
 void free_tree(struct exptree *t);
 void print_tree(struct exptree *t);
 struct exptree *parse(char *input[] , int pos , int maxpos);
-int eval(char *n , struct exptree *t);
+int eval(char *n ,char *actual_name, struct exptree *t);
 #endif

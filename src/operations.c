@@ -1,6 +1,5 @@
-#define _DEFAULT_SOURCE
+#define _GNU_SOURCE
 #include<stdio.h>
-#include<unistd.h>
 #include <fnmatch.h>
 #include <fcntl.h>
 #include<sys/types.h>
@@ -18,7 +17,10 @@ int printd(char *n , char *nl)
 }
 int name(char *n , char *name)
 {
-    return fnmatch( name , n , 0); 
+    int val = fnmatch(name , n , FNM_EXTMATCH);
+    if(val == 0)
+        return 1;
+    return 0;
 }
 
 int type(char *n , char *t)

@@ -7,6 +7,8 @@ struct exptree *create_n(char *name , char *arg)
 {
     struct exptree *n = malloc(sizeof(struct exptree));
     n->arg = arg;      // not valid for operators
+    n->left = NULL;
+    n->right = NULL;
     if(mycmp(name ,"-name") == 1)
         n->exp = 0;
     else if(mycmp(name ,"-type") == 1)
