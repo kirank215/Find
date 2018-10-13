@@ -11,7 +11,6 @@
 #include"myfind.h"
 int dir_loop(char *name , int n , struct exptree *t)
 {
-    int rv = 2;
     DIR *curdir = opendir(name);
     int statval;
     if(!curdir)
@@ -31,8 +30,7 @@ int dir_loop(char *name , int n , struct exptree *t)
             statval = stat(dirname , &dirbuf);
         else
             statval = lstat(dirname , &dirbuf);
-        if(eval(dirname ,dir->d_name , t) == 1)
-            rv = 0;
+        eval(dirname ,dir->d_name , t);
         if(statval == -1)
         {
             warnx("%s: cannot stat" , dirname);
@@ -42,8 +40,7 @@ int dir_loop(char *name , int n , struct exptree *t)
         if(S_ISLNK (dirbuf.st_mode))
         {
             free(dirname);
-            closedir(curdir);
-            return rv;
+            continue;
         }
         else if(S_ISDIR (dirbuf.st_mode ))
         {
@@ -62,26 +59,21 @@ int dir_loop(char *name , int n , struct exptree *t)
         return 1;
     }
     closedir(curdir);
-    return rv;
+    return 0;
 }
 int find_dir(char *name , int n , struct exptree *t)
 {
     int returnv = 1;
-    int valreturn;
     struct stat fbuf;
     if (lstat(name , &fbuf) == -1)
     {
         warnx(" cannot stat: %s " , name);
         return 1;
     }
-    if(eval(name ,name, t) == 1)
-        returnv=0;
+    eval(name ,name, t);
     if( S_ISLNK(fbuf.st_mode) && (n == 1))
         return returnv;
-    valreturn = dir_loop(name , n & 5 , t);  // if 1 -> error
-    if(valreturn != 2)                              // if 2->file not found
-        return valreturn;
-    return returnv;
+    return dir_loop(name , n & 5 , t);  // if 1 -> error
 }
 int main(int argc , char *argv[])
 {   

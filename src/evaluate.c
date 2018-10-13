@@ -4,7 +4,10 @@
 int eval(char *n , char *n_real, struct exptree *t)  //n_real  
 {                                                    // is without path
     if(t == NULL)
+    {
         warnx("missing expression");
+        return 0;
+    }
     else if(t->exp == 4)
         return (eval(n , n_real , t->left) && eval(n , n_real ,t ->right));
     else if(t->exp == 3)
@@ -15,5 +18,5 @@ int eval(char *n , char *n_real, struct exptree *t)  //n_real
         return type(n , t->arg);        
     else if(t->exp == 0)
         return name(n_real , t->arg);
-    return 0;
+    return -1;     // error - never goes here
 }
