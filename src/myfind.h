@@ -21,8 +21,9 @@ struct exptree
 int mylen(char *s);
 int mycmp(char *s1 , char *s2);
 char *mycat(char *s1 , char *s2);
-int find_dir(char *name , int n , struct exptree *tree);
-int dir_loop(char *name , int n , struct exptree *tree);
+char *mycat_normal(char *s1 , char *s2);
+int find_dir(char *name , int n , struct exptree *tree , int d);
+int dir_loop(char *name , int n , struct exptree *tree, int d);
 int printd(char *n , char *nl);
 int name(char *n , char *name);
 int type(char *n , char *t);
@@ -33,4 +34,5 @@ void free_tree(struct exptree *t);
 void print_tree(struct exptree *t);
 struct exptree *parse(char *input[] , int pos , int maxpos);
 int eval(char *n ,char *actual_name, struct exptree *t);
+int exec(char *arg);
 #endif

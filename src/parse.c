@@ -10,7 +10,11 @@ struct exptree *create_n(char *name , char *arg)
     n->left = NULL;
     n->right = NULL;
     if(mycmp(name ,"-name") == 1)
+    {
         n->exp = 0;
+        if(n->arg[mylen(n->arg) - 1] == '/')
+            warnx("file names dont contain slashes");
+    }
     else if(mycmp(name ,"-type") == 1)
         n->exp = 1;
     else if(mycmp(name ,"-print") == 1)
@@ -72,6 +76,11 @@ struct exptree *parse(char *argv[] , int pos , int maxpos)
                 action = 1;
                 arg = "\n";
             }   
+          /*  else if(mycmp(argv[i] , "-exec") == 1)
+            {
+                action = 1;
+                while(argv[i]
+            }*/
             node = create_n(argv[i] , arg);
             if(tree == NULL) // first element
                 tree = node;

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include<stdio.h>
+#include <sys/wait.h>
 #include <fnmatch.h>
 #include <fcntl.h>
 #include<sys/types.h>
@@ -48,3 +49,33 @@ int type(char *n , char *t)
         return 1;
     return 0;
 }
+/*
+int exec(char *arg)
+{
+    char *exec_arg[10];
+    for(int j = 0; j<10; j++)
+    {
+        for(int i = 0; *(arg + i) != ' '; i++)
+        {
+            if(*(arg + i) == ';')
+            {
+                exec_arg[j] = NULL;
+                break(2);
+            }
+            exec_arg[j][i] = *(arg + i);
+        }
+    }
+    pid_t pid = fork();
+    if(pid == -1)
+        errx(1, "exec failed");
+    else if(pid == 0)   // child process
+        execvp(exec_arg[0] , exec_arg);
+        errx(1 , "exec child failed");
+    else                // father process
+    {
+        int status = 0;
+        waitpid(pid , &status , 0);
+        return 1;
+    } 
+    return 1;
+}*/

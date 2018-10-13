@@ -9,7 +9,7 @@
 #include<sys/stat.h>
 #include<stdlib.h>
 #include"myfind.h"
-int dir_loop(char *name , int n , struct exptree *t)
+int dir_loop(char *name , int n , struct exptree *t , int d)
 {
     DIR *curdir = opendir(name);
     int statval;
@@ -26,11 +26,12 @@ int dir_loop(char *name , int n , struct exptree *t)
         if(mycmp(dir->d_name , ".") == 1 || mycmp(dir->d_name ,"..") == 1)
             continue;
         dirname = mycat(name , dir->d_name);
-        if((n & 1) != 1 || (n & 2) == 2)
+        if(n != 1)
             statval = stat(dirname , &dirbuf);
         else
             statval = lstat(dirname , &dirbuf);
-        eval(dirname ,dir->d_name , t);
+        if(d == 0)
+            eval(dirname ,dir->d_name , t);
         if(statval == -1)
         {
             warnx("%s: cannot stat" , dirname);
@@ -44,12 +45,14 @@ int dir_loop(char *name , int n , struct exptree *t)
         }
         else if(S_ISDIR (dirbuf.st_mode ))
         {
-            if(dir_loop(dirname , 1 , t) == 1)
+            if(dir_loop(dirname , 1 , t , d) == 1)
             {
                 closedir(curdir);
                 return 1;
             }
         }
+        if(d == 1)
+            eval(dirname , dir->d_name , t);
         free(dirname);
     }
     if(errno == EBADF)
@@ -61,7 +64,7 @@ int dir_loop(char *name , int n , struct exptree *t)
     closedir(curdir);
     return 0;
 }
-int find_dir(char *name , int n , struct exptree *t)
+int find_dir(char *name , int n , struct exptree *t , int d)
 {
     int returnv = 1;
     struct stat fbuf;
@@ -70,15 +73,22 @@ int find_dir(char *name , int n , struct exptree *t)
         warnx(" cannot stat: %s " , name);
         return 1;
     }
-    eval(name ,name, t);
+    if(d == 0)
+        eval(name ,name, t);
     if( S_ISLNK(fbuf.st_mode) && (n == 1))
         return returnv;
-    return dir_loop(name , n & 5 , t);  // if 1 -> error
+    if(n == 2)
+        n = 1;
+    returnv = dir_loop(name , n , t , d);  // if 1 -> error
+    if(d == 1)
+        eval(name , name , t);
+    return returnv;
 }
 int main(int argc , char *argv[])
 {   
     int returnval = 0;
     struct exptree *tree = NULL;
+    int d;
     char *(name)[10];
     name[0] = ".";
     int n_index = 0;
@@ -88,13 +98,13 @@ int main(int argc , char *argv[])
         if(argv[i][0] == '-' && mylen(argv[i]) == 2)
         {
                 if(argv[i][1] == 'P')
-                    option = option | 1;
+                    option = 1;
                 else if(argv[i][1] == 'L')
-                    option = option & 6;
+                    option = 0;
                 else if(argv[i][1] == 'H')
-                    option = option | 2;
+                    option = 2;
                 else if(argv[i][1] == 'd')
-                    option = option | 4;
+                    d = 1;
         }
         else if( argv[i][0] != '-')
         {
@@ -111,7 +121,10 @@ int main(int argc , char *argv[])
         tree = create_n("-print" , "\n");
     n_index = (n_index == 0) ? 1 : n_index;
     for( int i=0; i < n_index; i++)
-        returnval = find_dir(name[i] , option, tree);
+    {
+        if(find_dir(name[i] , option, tree , d) == 1)
+            returnval = 1;
+    }
     free_tree(tree);
     return returnval;
 }

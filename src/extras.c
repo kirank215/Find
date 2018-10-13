@@ -48,3 +48,18 @@ char *mycat(char *s1 , char *s2)
     *(new + i + j) = '\0';
     return new;
 }
+char *mycat_normal(char *s1 , char *s2)
+{
+    char *new = calloc((mylen(s1) + mylen(s2) + 1) , sizeof(char));
+    int i = 0;
+    int j = 0;
+    for (; *(s1 + i) != '\0';i++)
+        *(new + i) = *(s1 + i);
+    while (*(s2 + j) != '\0')
+    {
+        *(new + i + j) = *(s2 + j);
+        j++;
+    }
+    *(new + i + j) = '\0';
+    return new;
+}
