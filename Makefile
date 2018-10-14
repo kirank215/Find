@@ -10,7 +10,7 @@ all: myfind
 myfind: $(OBJ)
 	$(CC) $(CFLAGS) $^ -o $@
 
-test: 
+check: 
 	$(TESTFILE) $(TESTDIR)
 
 clean:

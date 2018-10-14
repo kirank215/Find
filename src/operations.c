@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include <unistd.h>
 #include<stdio.h>
 #include <sys/wait.h>
 #include <fnmatch.h>
@@ -49,28 +50,46 @@ int type(char *n , char *t)
         return 1;
     return 0;
 }
-/*
-int exec(char *arg)
+char **parse_exec(char *argv[] , int *pos , int maxpos)
 {
-    char *exec_arg[10];
-    for(int j = 0; j<10; j++)
+    char **exe_arg = malloc(sizeof(char) * 550);
+    int j = 0;
+    for(; *pos < maxpos ; (*pos)+=1)
     {
-        for(int i = 0; *(arg + i) != ' '; i++)
+        if(argv[*pos][0] == ';')
         {
-            if(*(arg + i) == ';')
-            {
-                exec_arg[j] = NULL;
-                break(2);
-            }
-            exec_arg[j][i] = *(arg + i);
+            exe_arg[j] = NULL;
+            break;   
         }
+        else
+            exe_arg[j] = argv[*pos];
+        j++;
     }
+    if(exe_arg[j] != NULL)
+    {
+        free(exe_arg);
+        errx(1 , "exec : missing ;");
+    }
+    return exe_arg;
+}
+int exec(char **arg , char *name)
+{
     pid_t pid = fork();
     if(pid == -1)
         errx(1, "exec failed");
     else if(pid == 0)   // child process
-        execvp(exec_arg[0] , exec_arg);
+    {
+        for(int i = 0; arg[i] != NULL ; i++)
+        {
+            if(arg[i][0] == '{' && arg[i][1] == '}')
+            {
+                arg[i] = malloc(sizeof(char) * 255);
+                arg[i] = name;
+            }
+        }
+        execvp(arg[0] , arg);
         errx(1 , "exec child failed");
+    }
     else                // father process
     {
         int status = 0;
@@ -78,4 +97,4 @@ int exec(char *arg)
         return 1;
     } 
     return 1;
-}*/
+} 

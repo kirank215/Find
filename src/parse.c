@@ -3,10 +3,11 @@
 #include<err.h>
 #include"myfind.h"
 
-struct exptree *create_n(char *name , char *arg)
+struct exptree *create_n(char *name , char *arg , char **exec_arg)
 {
     struct exptree *n = malloc(sizeof(struct exptree));
     n->arg = arg;      // not valid for operators
+    n->exec_arg = exec_arg;
     n->left = NULL;
     n->right = NULL;
     if(mycmp(name ,"-name") == 1)
@@ -23,6 +24,8 @@ struct exptree *create_n(char *name , char *arg)
         n->exp = 3;
     else if(mycmp(name ,"-a") == 1)
         n->exp = 4;
+    else if(mycmp(name ,"-exec") == 1)
+        n->exp = 5;
     else
         errx(1 , "%s: invalid option" , name);
     return n;
@@ -41,6 +44,7 @@ void free_tree(struct exptree *t)
 {
     if(t->left == NULL && t->right == NULL)
     {
+        free(t->exec_arg);
         free(t);
         return;
     }
@@ -48,6 +52,7 @@ void free_tree(struct exptree *t)
         free_tree(t->left);
     if(t->right != NULL)
         free_tree(t->right);
+    free(t->exec_arg);
     free(t);
 }
 void print_tree(struct exptree *t)
@@ -62,26 +67,32 @@ struct exptree *parse(char *argv[] , int pos , int maxpos)
 {
     struct exptree *tree = NULL;
     struct exptree *node = NULL;
+    char **exec_arg = NULL;
     int op = 0;
     int action = 0; 
+    char *cmd;
     char *arg;
     char *operator;
     for(int i=pos; i < maxpos; i++)
     {
         if(!op)
         {
+            cmd = argv[i];
+            if( i + 1 == maxpos && mycmp(cmd , "-print") != 1)
+                errx(1 , "%s: missing operator " , argv[i]);
             arg = argv[i+1];
             if(mycmp(argv[i] , "-print") == 1)
             {
                 action = 1;
                 arg = "\n";
             }   
-          /*  else if(mycmp(argv[i] , "-exec") == 1)
+            else if(mycmp(argv[i] , "-exec") == 1)
             {
                 action = 1;
-                while(argv[i]
-            }*/
-            node = create_n(argv[i] , arg);
+                i+=1;  // skip '-exec'
+                exec_arg = parse_exec(argv , &i , maxpos);
+            }
+            node = create_n(cmd , arg , exec_arg);
             if(tree == NULL) // first element
                 tree = node;
             else
@@ -89,6 +100,7 @@ struct exptree *parse(char *argv[] , int pos , int maxpos)
             if(action != 1)
                 i++;
             op = 1;
+            exec_arg = NULL;
         }
         else if(op)
         {
@@ -98,18 +110,18 @@ struct exptree *parse(char *argv[] , int pos , int maxpos)
                 operator = "-a";  // add and if nothing present
                 i--;
             }
-            node = create_n(operator , 0);
+            node = create_n(operator , 0 ,exec_arg );
             tree = add_l(node , tree);
             op = 0;
         }
     }
     if(tree == NULL)
-        tree = create_n("-print" , "\n");
+        tree = create_n("-print" , "\n" , exec_arg);
     else if(action == 0)
     {
-        node = create_n("-a" , 0);
+        node = create_n("-a" , 0 , exec_arg);
         tree = add_l(node , tree);
-        node = create_n("-print" , "\n");
+        node = create_n("-print" , "\n" , exec_arg);
         tree = add_r(tree , node);
     }
     return tree;

@@ -118,7 +118,7 @@ int main(int argc , char *argv[])
         }
     }
     if(tree == NULL)
-        tree = create_n("-print" , "\n");
+        tree = create_n("-print" , "\n" , NULL);
     n_index = (n_index == 0) ? 1 : n_index;
     for( int i=0; i < n_index; i++)
     {
