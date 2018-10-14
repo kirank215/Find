@@ -91,13 +91,14 @@ struct exptree *parse(char *argv[] , int pos , int maxpos)
                 action = 1;
                 i+=1;  // skip '-exec'
                 exec_arg = parse_exec(argv , &i , maxpos);
+                i--;
             }
             node = create_n(cmd , arg , exec_arg);
             if(tree == NULL) // first element
                 tree = node;
             else
                 tree = add_r(tree , node); // adds node to the right of tree
-            if(action != 1)
+            if(mycmp(cmd , "-print") != 1)
                 i++;
             op = 1;
             exec_arg = NULL;

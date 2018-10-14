@@ -40,12 +40,14 @@ int dir_loop(char *name , int n , struct exptree *t , int d)
         }
         if(S_ISLNK (dirbuf.st_mode))
         {
+            if(d == 1)
+                eval(dirname , dir->d_name , t);
             free(dirname);
             continue;
         }
         else if(S_ISDIR (dirbuf.st_mode ))
         {
-            if(dir_loop(dirname , 1 , t , d) == 1)
+            if(dir_loop(dirname , n , t , d) == 1)
             {
                 closedir(curdir);
                 return 1;
@@ -97,14 +99,14 @@ int main(int argc , char *argv[])
     {
         if(argv[i][0] == '-' && mylen(argv[i]) == 2)
         {
-                if(argv[i][1] == 'P')
-                    option = 1;
-                else if(argv[i][1] == 'L')
-                    option = 0;
-                else if(argv[i][1] == 'H')
-                    option = 2;
-                else if(argv[i][1] == 'd')
-                    d = 1;
+            if(argv[i][1] == 'P')
+                option = 1;
+            else if(argv[i][1] == 'L')
+                option = 0;
+            else if(argv[i][1] == 'H')
+                option = 2;
+            else if(argv[i][1] == 'd')
+                d = 1;
         }
         else if( argv[i][0] != '-')
         {
