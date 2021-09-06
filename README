@@ -1,9 +1,4 @@
-My find works until threshhold 4 without execdir. To manage expressions , I
-used a tree by adding the operators to the root and the tests at the leaf.
-I also have a test suite with shell 
-
-
------------MAKEFILE USEAGE-----
+MAKEFILE USEAGE
 
 make all ----> generate myfind
 make check TESTDIR =(directory name to test) ----> test with .sh
