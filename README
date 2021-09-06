@@ -1,9 +1,7 @@
 My find works until threshhold 4 without execdir. To manage expressions , I
 used a tree by adding the operators to the root and the tests at the leaf.
-I also have a test suite with shell until threshold 3.I haven't respeted the
-coding style a lot evethough i tried to. 
-I also respect the leaks almost all times (with everything i tested). I have
-also checked for the return values with my test suite.
+I also have a test suite with shell 
+
 
 -----------MAKEFILE USEAGE-----
 
